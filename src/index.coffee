@@ -4,8 +4,7 @@ Promise = require 'when'
 ActivityItemSchema = require './models/ActivityItem'
 
 module.exports = (System) ->
-  mongoose = System.api.getMongoose 'public'
-  ActivityItem = ActivityItemSchema mongoose
+  ActivityItem = System.registerModel 'ActivityItem', ActivityItemSchema
 
   saveModel = (item) ->
     deferred = Promise.defer()
@@ -16,10 +15,11 @@ module.exports = (System) ->
 
   models = {}
   postInit = ->
-    toPopulate = System.api.getGlobal 'public.activityItem.populate'
+    toPopulate = System.getGlobal 'public.activityItem.populate'
     return unless toPopulate
     for k, v of toPopulate
-      models[k] = mongoose.model v
+      model = System.getModel v
+      models[k] = model if model
     # console.log 'models', Object.keys models
 
   populateModel = (item) ->
@@ -67,7 +67,7 @@ module.exports = (System) ->
       .findOne (err, item) ->
         return next err if err
         return next() unless item
-        System.api.do 'activityItem.populate', item
+        System.do 'activityItem.populate', item
         .then ->
           if item.toObject
             item = item.toObject()
@@ -82,7 +82,7 @@ module.exports = (System) ->
       .findOne (err, item) ->
         return next err if err
         return next() unless item
-        System.api.do 'activityItem.save', item
+        System.do 'activityItem.save', item
         .then ->
           if item.toObject
             item = item.toObject()
@@ -99,7 +99,7 @@ module.exports = (System) ->
       .findOne (err, item) ->
         return next err if err
         return next() unless item
-        System.api.do 'activityItem.populate', item
+        System.do 'activityItem.populate', item
         .then ->
           if item.toObject
             item = item.toObject()
@@ -123,7 +123,7 @@ module.exports = (System) ->
         console.log 'new item', item
         item.save (err) ->
           return next err if err
-          System.api.do 'activityItem.populate', item
+          System.do 'activityItem.populate', item
           .then ->
             res.send item
           .catch (err) ->
@@ -134,7 +134,7 @@ module.exports = (System) ->
         guid: 'test'
       .findOne (err, item) ->
         return next err if err
-        System.api.do 'activityItem.populate', item
+        System.do 'activityItem.populate', item
         .done ->
           res.send item
         , (err) ->
@@ -152,11 +152,14 @@ module.exports = (System) ->
     public:
       activityItem:
         populate: {}
-    events:
-      init:
-        post: postInit
-      activityItem:
-        save:
-          do: saveModel
-        populate:
-          do: populateModel
+  events:
+    init:
+      post: postInit
+    activityItem:
+      save:
+        do: saveModel
+      populate:
+        do: populateModel
+
+  models:
+    ActivityItem: ActivityItem
