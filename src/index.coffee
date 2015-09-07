@@ -7,11 +7,10 @@ module.exports = (System) ->
   ActivityItem = System.registerModel 'ActivityItem', ActivityItemSchema
 
   saveModel = (item) ->
-    deferred = Promise.defer()
-    item.save (err) ->
-      return deferred.reject err if err
-      deferred.resolve item
-    deferred.promise
+    Promise.promise (resolve, reject) ->
+      item.save (err) ->
+        return reject err if err
+        resolve item
 
   models = {}
   postInit = ->
@@ -24,23 +23,21 @@ module.exports = (System) ->
 
   populateModel = (item) ->
     Promise.all _.map models, (Model, property) ->
-      deferred = Promise.defer()
-      unless item.attributes?[property]
-        return {
-          property: property
-          items: []
-        }
-      ids = item.attributes[property] ? []
-      Model
-      .where
-        _id:
-          '$in': ids
-      .find (err, items) ->
-        return deferred.reject err if err
-        deferred.resolve
-          property: property
-          items: items
-      deferred.promise
+      Promise.promise (resolve, reject) ->
+        unless item.attributes?[property]
+          return resolve
+            property: property
+            items: []
+        ids = item.attributes[property] ? []
+        Model
+        .where
+          _id:
+            '$in': ids
+        .find (err, items) ->
+          return reject err if err
+          resolve
+            property: property
+            items: items
     .then (arr) ->
       # console.log 'make sure item.fullAttributes exists', item.fullAttributes
       item.fullAttributes = {} unless item.fullAttributes?
@@ -152,6 +149,7 @@ module.exports = (System) ->
     public:
       activityItem:
         populate: {}
+        icons: {}
   events:
     init:
       post: postInit
