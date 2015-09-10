@@ -1,6 +1,6 @@
 # kerplunk-activityitem
 
-[Kerplunk](https://github.com/brianshaler/kerplunk) plugin. 
+[Kerplunk](https://github.com/brianshaler/kerplunk) plugin. Core data model for generic activity items
 
 [![Build Status](https://travis-ci.org/brianshaler/kerplunk-activityitem.svg)](https://travis-ci.org/brianshaler/kerplunk-activityitem)
 [![npm version](https://img.shields.io/npm/v/kerplunk-activityitem.svg)](https://www.npmjs.com/package/kerplunk-activityitem)
