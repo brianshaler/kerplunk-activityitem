@@ -34,5 +34,6 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/brianshaler/kerplunk-activityitem.git"
-  }
+  },
+  "license": "MIT"
 }
