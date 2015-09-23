@@ -95,11 +95,18 @@ module.exports = (mongoose) ->
     err = null
     userData = data.identity.data
 
-    delete data.identity.data
+    # delete data.identity.data
+    where = {}
+    for k, v of data.identity
+      if k != 'data'
+        where[k] = v
 
-    Identity.getOrCreate data.identity, (err, identity) ->
+    Identity.getOrCreate where, (err, identity) ->
       return next err if err
-      identity.setData data.identity.platform, userData
+      identity.data = {} unless identity.data
+      for k, v of userData
+        identity.data[k] = v
+      identity.markModified 'data'
       ActivityItem.findOne q, (err, item) ->
         return next err if err
         if item
