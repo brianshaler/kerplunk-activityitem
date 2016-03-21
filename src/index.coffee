@@ -143,7 +143,7 @@ module.exports = (System) ->
       .limit req.query.limit
       .find (err, items) ->
         return next err if err
-        res.send data: _.pluck items, 'data'
+        res.send data: _.map items, 'data'
 
   globals:
     public:
